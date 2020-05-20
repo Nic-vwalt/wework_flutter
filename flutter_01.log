@@ -1,0 +1,66 @@
+Flutter crash report; please file at https://github.com/flutter/flutter/issues.
+
+## command
+
+flutter --no-color pub get
+
+## exception
+
+FileSystemException: FileSystemException: Deletion failed, path = 'F:\Development\Android\wework_flutter\.android' (OS Error: The directory is not empty.
+, errno = 145)
+
+```
+#0      _Directory._deleteSync (dart:io/directory_impl.dart:208:7)
+#1      FileSystemEntity.deleteSync (dart:io/file_system_entity.dart:460:47)
+#2      ForwardingFileSystemEntity.deleteSync (package:file/src/forwarding/forwarding_file_system_entity.dart:72:16)
+#3      _deleteIfExistsSync (package:flutter_tools/src/project.dart:822:15)
+#4      AndroidProject._regenerateLibrary (package:flutter_tools/src/project.dart:721:5)
+#5      AndroidProject.ensureReadyForPlatformSpecificTooling (package:flutter_tools/src/project.dart:682:13)
+#6      FlutterProject.ensureReadyForPlatformSpecificTooling (package:flutter_tools/src/project.dart:212:21)
+#7      PackagesGetCommand.runCommand (package:flutter_tools/src/commands/packages.dart:128:23)
+<asynchronous suspension>
+#8      FlutterCommand.verifyThenRunCommand (package:flutter_tools/src/runner/flutter_command.dart:723:18)
+#9      _rootRunUnary (dart:async/zone.dart:1192:38)
+#10     _CustomZone.runUnary (dart:async/zone.dart:1085:19)
+#11     _FutureListener.handleValue (dart:async/future_impl.dart:141:18)
+#12     Future._propagateToListeners.handleValueCallback (dart:async/future_impl.dart:682:45)
+#13     Future._propagateToListeners (dart:async/future_impl.dart:711:32)
+#14     Future._completeWithValue (dart:async/future_impl.dart:526:5)
+#15     Future._asyncComplete.<anonymous closure> (dart:async/future_impl.dart:556:7)
+#16     _rootRun (dart:async/zone.dart:1184:13)
+#17     _CustomZone.run (dart:async/zone.dart:1077:19)
+#18     _CustomZone.runGuarded (dart:async/zone.dart:979:7)
+#19     _CustomZone.bindCallbackGuarded.<anonymous closure> (dart:async/zone.dart:1019:23)
+#20     _microtaskLoop (dart:async/schedule_microtask.dart:43:21)
+#21     _startMicrotaskLoop (dart:async/schedule_microtask.dart:52:5)
+#22     _runPendingImmediateCallback (dart:isolate-patch/isolate_patch.dart:118:13)
+#23     _RawReceivePortImpl._handleMessage (dart:isolate-patch/isolate_patch.dart:169:5)
+```
+
+## flutter doctor
+
+```
+[✓] Flutter (Channel stable, v1.17.1, on Microsoft Windows [Version 10.0.17763.805], locale en-ZA)
+    • Flutter version 1.17.1 at F:\Development\flutter
+    • Framework revision f7a6a7906b (8 days ago), 2020-05-12 18:39:00 -0700
+    • Engine revision 6bc433c6b6
+    • Dart version 2.8.2
+
+[!] Android toolchain - develop for Android devices (Android SDK version 29.0.3)
+    • Android SDK at C:\Users\Nic\AppData\Local\Android\sdk
+    • Platform android-29, build-tools 29.0.3
+    • Java binary at: E:\Program Files (86x)\Android\Android Studio\jre\bin\java
+    • Java version OpenJDK Runtime Environment (build 1.8.0_212-release-1586-b04)
+    ! Some Android licenses not accepted.  To resolve this, run: flutter doctor --android-licenses
+
+[✓] Android Studio (version 3.6)
+    • Android Studio at E:\Program Files (86x)\Android\Android Studio
+    • Flutter plugin version 45.1.1
+    • Dart plugin version 192.8052
+    • Java version OpenJDK Runtime Environment (build 1.8.0_212-release-1586-b04)
+
+[✓] Connected device (1 available)
+    • sdk gphone x86 arm • emulator-5554 • android-x86 • Android 10 (API 29) (emulator)
+
+! Doctor found issues in 1 category.
+```
