@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -5,74 +7,168 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:weworkflutter/screens/crew/crewprofile.dart';
 
 class FindSkillScreen extends StatelessWidget {
+  TextEditingController _filtercontroller = TextEditingController();
+
+  final FirebaseAuth fAuth = FirebaseAuth.instance;
+  final StorageReference fStorageRef = FirebaseStorage().ref().child("ID Photos");
+  static final Firestore fStore = Firestore.instance;
+
+  Stream<QuerySnapshot> _stream = fStore.collection('users').where('UserType', isEqualTo: 'crewmember').snapshots();
+
+  _search() async {
+    if (_filtercontroller.text == null){
+
+      return;
+    }
+    _stream = fStore.collection('users').where('Skills', arrayContains: _filtercontroller.text).snapshots();
+
+  }
+
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text("Find Skills"),
-      ),
-      body: new SkillList(),
-      bottomNavigationBar: BottomAppBar(
-        child: new TextField(
-          decoration: InputDecoration(
-            contentPadding: EdgeInsets.all(15.0),
-            hintText: 'Filter Crewmembers',
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Find Skills"),
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(50.0),
+          child: Row(
+            children: <Widget>[
+              Expanded(
+                child: Container(
+                  margin: const EdgeInsets.only(left: 12.0, bottom: 5.0),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(18.0),
+                  ),
+                  child: TextFormField(
+                    controller: _filtercontroller,
+                    decoration: InputDecoration(
+                      hintText: 'Filter Skills',
+                      contentPadding: EdgeInsets.all(18.0),
+                    ),
+                  ),
+                ),
+              ),
+              IconButton(
+                icon: Icon(
+                  Icons.search,
+                  color: Colors.black,
+                ),
+                onPressed: () {
+                  _search();
+                },
+              )
+            ],
           ),
         ),
       ),
-    );
-  }
-}
-
-class SkillList extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final FirebaseAuth fAuth = FirebaseAuth.instance;
-    final StorageReference fStorageRef = FirebaseStorage().ref().child("ID Photos");
-    final Firestore fStore = Firestore.instance;
-    final filtercontroller = TextEditingController();
-    
-    String filter = '';
-    return new Material(
-      child: new Column(
-        children: <Widget>[
-          Padding(
-            padding: new EdgeInsets.only(top: 20.0),
-          ),
-          TextField(
-            controller: filtercontroller,
-            decoration: new InputDecoration(
-                labelText: "Filter Crewmembers"
-            ),
-            
-          ),
-          StreamBuilder(
-            stream: fStore.collection('users').where('UserType', isEqualTo: 'crewmember').snapshots(),
-            builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot){
-              if (!snapshot.hasData) return new Text('Loading...');
-              return new ListView(
-                children: snapshot.data.documents.map((document){
-                  return new ListTile(
-                      title: new Text(document['FirstName']+' '+document['LastName']),
-                      subtitle: new Text('Skills: '+document['Skills'].toString()),
-                      trailing: Icon(Icons.keyboard_arrow_right),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => crewprofile()),
-                        );
-                      }
-                  );
-                }).toList(),
+      body: StreamBuilder(
+        stream: _stream,
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot){
+          if (!snapshot.hasData) return Text('Loading...');
+          return ListView(
+            children: snapshot.data.documents.map((document){
+              return ListTile(
+                  leading: Icon(Icons.contact_phone),
+                  title: Text(document['FirstName']+' '+document['LastName']),
+                  subtitle: Text('Skills: '+document['Skills'].toString().replaceAll('[','').replaceAll(']','')),
+                  trailing: Icon(Icons.keyboard_arrow_right),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => crewprofile()),
+                    );
+                  }
               );
-            },
-          ),
-        ],
+            }).toList(),
+          );
+        },
       ),
     );
   }
 }
 
+//class SkillList extends StatelessWidget {
+//  @override
+//  Widget build(BuildContext context) {
+//
+//    //final filtercontroller = TextEditingController();
+//
+//    Stream<QuerySnapshot> crewstream = fStore.collection('users').where('UserType', isEqualTo: 'crewmember').snapshots();
+//    return new StreamBuilder(
+//      stream: crewstream,
+//      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot){
+//        if (!snapshot.hasData) return new Text('Loading...');
+//        return new ListView(
+//          children: snapshot.data.documents.map((document){
+//            return new ListTile(
+//                title: new Text(document['FirstName']+' '+document['LastName']),
+//                subtitle: new Text('Skills: '+document['Skills'].toString()),
+//                trailing: Icon(Icons.keyboard_arrow_right),
+//                onTap: () {
+//                  Navigator.push(
+//                    context,
+//                    MaterialPageRoute(builder: (context) => crewprofile()),
+//                  );
+//                }
+//            );
+//          }).toList(),
+//        );
+//      },
+//    );
+//
+//  }
+//}
+//
+//
+//
+//
+//class testcode extends StatelessWidget {
+//  @override
+//  Widget build(BuildContext context) {
+//    return new Material(
+//      child: new Column(
+//        children: <Widget>[
+//          new Padding(
+//            padding: new EdgeInsets.only(top: 20.0),
+//          ),
+//          new TextField(
+//            onChanged: (text){
+//              crewstream = fStore.collection('users').where('Skills', arrayContains: text).snapshots();
+//            },
+//            decoration: new InputDecoration(
+//              contentPadding: EdgeInsets.all(15.0),
+//              hintText: "Filter Crewmembers",
+//            ),
+//          ),
+//          new StreamBuilder(
+//            stream: crewstream,
+//            builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot){
+//              if (!snapshot.hasData) return new Text('Loading...');
+//              return new ListView(
+//                children: snapshot.data.documents.map((document){
+//                  return new ListTile(
+//                      title: new Text(document['FirstName']+' '+document['LastName']),
+//                      subtitle: new Text('Skills: '+document['Skills'].toString()),
+//                      trailing: Icon(Icons.keyboard_arrow_right),
+//                      onTap: () {
+//                        Navigator.push(
+//                          context,
+//                          MaterialPageRoute(builder: (context) => crewprofile()),
+//                        );
+//                      }
+//                  );
+//                }).toList(),
+//              );
+//            },
+//          ),
+//        ],
+//      ),
+//    );
+//  }
+//}
+//
+//
 
 
 
@@ -100,25 +196,3 @@ class SkillList extends StatelessWidget {
 //  return CircularProgressIndicator();
 //  }
 //}
-
-return new StreamBuilder(
-stream: fStore.collection('users').where('UserType', isEqualTo: 'crewmember').snapshots(),
-builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot){
-if (!snapshot.hasData) return new Text('Loading...');
-return new ListView(
-children: snapshot.data.documents.map((document){
-return new ListTile(
-title: new Text(document['FirstName']+' '+document['LastName']),
-subtitle: new Text('Skills: '+document['Skills'].toString()),
-trailing: Icon(Icons.keyboard_arrow_right),
-onTap: () {
-Navigator.push(
-context,
-MaterialPageRoute(builder: (context) => crewprofile()),
-);
-}
-);
-}).toList(),
-);
-},
-);
