@@ -4,9 +4,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:weworkflutter/screens/crew/crewprofile.dart';
+import 'package:weworkflutter/screens/profile/viewprofile.dart';
 
-class FindSkillScreen extends StatelessWidget {
+class FindSkillScreen extends StatefulWidget {
+  @override
+  _FindSkillScreenState createState() => _FindSkillScreenState();
+}
+
+class _FindSkillScreenState extends State<FindSkillScreen> {
   TextEditingController _filtercontroller = TextEditingController();
 
   final FirebaseAuth fAuth = FirebaseAuth.instance;
@@ -15,14 +20,7 @@ class FindSkillScreen extends StatelessWidget {
 
   Stream<QuerySnapshot> _stream = fStore.collection('users').where('UserType', isEqualTo: 'crewmember').snapshots();
 
-  _search() async {
-    if (_filtercontroller.text == null){
 
-      return;
-    }
-    _stream = fStore.collection('users').where('Skills', arrayContains: _filtercontroller.text).snapshots();
-
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +41,7 @@ class FindSkillScreen extends StatelessWidget {
                   child: TextFormField(
                     controller: _filtercontroller,
                     decoration: InputDecoration(
-                      hintText: 'Filter Skills',
+                      hintText: "Filter Skills",
                       contentPadding: EdgeInsets.all(18.0),
                     ),
                   ),
@@ -54,39 +52,45 @@ class FindSkillScreen extends StatelessWidget {
                   Icons.search,
                   color: Colors.black,
                 ),
-                onPressed: () {
-                  _search();
-                },
+                onPressed: () => setState(() => _stream = fStore.collection('users').where('Skills', arrayContains: _filtercontroller.text.toLowerCase()).snapshots()),
               )
             ],
           ),
         ),
       ),
-      body: StreamBuilder(
-        stream: _stream,
-        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot){
-          if (!snapshot.hasData) return Text('Loading...');
-          return ListView(
-            children: snapshot.data.documents.map((document){
-              return ListTile(
-                  leading: Icon(Icons.contact_phone),
-                  title: Text(document['FirstName']+' '+document['LastName']),
-                  subtitle: Text('Skills: '+document['Skills'].toString().replaceAll('[','').replaceAll(']','')),
-                  trailing: Icon(Icons.keyboard_arrow_right),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => crewprofile()),
-                    );
-                  }
-              );
-            }).toList(),
-          );
-        },
+      body: Container(
+        decoration: BoxDecoration(
+
+        ),
+        child: StreamBuilder(
+          stream: _stream,
+          builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot){
+            if (!snapshot.hasData) return Text('Loading...');
+            return ListView(
+              children: snapshot.data.documents.map((document){
+                return ListTile(
+                    leading: Icon(Icons.contact_phone),
+                    title: Text(document['FirstName']+' '+document['LastName']),
+                    subtitle: Text('Skills: '+document['Skills'].toString().replaceAll('[','').replaceAll(']','')),
+                    trailing: Icon(Icons.keyboard_arrow_right),
+                    onTap: () {
+
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => viewprofile(document)),
+                      );
+                    }
+                );
+              }).toList(),
+            );
+          },
+        ),
       ),
     );
   }
 }
+
+
 
 //class SkillList extends StatelessWidget {
 //  @override
