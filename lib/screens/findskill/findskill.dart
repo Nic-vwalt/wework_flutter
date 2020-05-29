@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -15,18 +16,55 @@ class _FindSkillScreenState extends State<FindSkillScreen> {
   TextEditingController _filtercontroller = TextEditingController();
 
   final FirebaseAuth fAuth = FirebaseAuth.instance;
-  final StorageReference fStorageRef = FirebaseStorage().ref().child("ID Photos");
+  StorageReference fStorageRef;
+  String imgtest = "false";
+  String _img;
   static final Firestore fStore = Firestore.instance;
 
   Stream<QuerySnapshot> _stream = fStore.collection('users').where('UserType', isEqualTo: 'crewmember').snapshots();
 
+//  void dispose() {
+//    // TODO: implement dispose
+//    _filtercontroller.dispose();
+//    super.dispose();
+//  }
+  @override
+  void initState() {
+    super.initState();
 
+  }
+
+  Future<String> _loadImage(DocumentSnapshot document) async {
+    String ref = document["IDRef"].toString();
+    fStorageRef = FirebaseStorage().ref().child(ref);
+    String img = await fStorageRef.getDownloadURL();
+    imgtest = img;
+    //Uint8List _img = img;
+    if (img != null) {
+      return img;
+    }
+  }
+
+  String img(DocumentSnapshot document) {
+
+    _loadImage(document).then((value) {
+      _img = value;
+      setState((){ _img = value; });
+    });
+    if (_img != null) {
+      return _img;
+    }else{
+      return 'https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcQg2LdiecyCVRWjMbDinmlaVe57SJUK2m4QXOCdp1BgB6VUmGaV&usqp=CAU';
+    }
+
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Find Skills"),
+        title: Text(imgtest),
+        backgroundColor: Color.fromARGB(255, 255, 227, 48),
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(50.0),
           child: Row(
@@ -36,13 +74,13 @@ class _FindSkillScreenState extends State<FindSkillScreen> {
                   margin: const EdgeInsets.only(left: 12.0, bottom: 5.0),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(18.0),
+                    borderRadius: BorderRadius.circular(10.0),
                   ),
                   child: TextFormField(
                     controller: _filtercontroller,
                     decoration: InputDecoration(
                       hintText: "Filter Skills",
-                      contentPadding: EdgeInsets.all(18.0),
+                      contentPadding: EdgeInsets.all(10.0),
                     ),
                   ),
                 ),
@@ -69,16 +107,18 @@ class _FindSkillScreenState extends State<FindSkillScreen> {
             return ListView(
               children: snapshot.data.documents.map((document){
                 return ListTile(
-                    leading: Icon(Icons.contact_phone),
+                    leading: Image.network(
+                      img(document),
+                    ),
                     title: Text(document['FirstName']+' '+document['LastName']),
                     subtitle: Text('Skills: '+document['Skills'].toString().replaceAll('[','').replaceAll(']','')),
                     trailing: Icon(Icons.keyboard_arrow_right),
                     onTap: () {
-
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => viewprofile(document)),
                       );
+                      //dispose();
                     }
                 );
               }).toList(),
